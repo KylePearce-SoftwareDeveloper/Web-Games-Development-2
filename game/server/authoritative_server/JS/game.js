@@ -5,6 +5,7 @@ const config = {
     parent: 'phaser-example',
     width: 800,
     height: 600,
+    backgroundColor: '#ffffff',
     physics: {
         default: 'arcade',
         arcade: {
@@ -21,8 +22,8 @@ const config = {
 };
 
 function preload() {
-    this.load.image('ship', 'assets/spaceShips_001.png');
-    this.load.image('star', 'assets/star_gold.png');
+    this.load.image('player', 'assets/player.png');
+    this.load.image('flag', 'assets/flag.png');
 }
 
 function create() {
@@ -34,18 +35,18 @@ function create() {
         red: 0
     };
 
-    this.star = this.physics.add.image(randomPosition(700), randomPosition(500), 'star');
+    this.flag = this.physics.add.image(800/2, 600/2, 'flag');
     this.physics.add.collider(this.players);
 
-    this.physics.add.overlap(this.players, this.star, function (star, player) {
+    this.physics.add.overlap(this.players, this.flag, function (flag, player) {
         if (players[player.playerId].team === 'red') {
-            self.scores.red += 10;
+            self.scores.red += 1;
         } else {
-            self.scores.blue += 10;
+            self.scores.blue += 1;
         }
-        self.star.setPosition(randomPosition(700), randomPosition(500));
+        self.flag.setPosition(player.x, player.y);
         io.emit('updateScore', self.scores);
-        io.emit('starLocation', { x: self.star.x, y: self.star.y });
+        io.emit('flagLocation', { x: self.flag.x, y: self.flag.y });
     });
 
     io.on('connection', function (socket) {
@@ -70,8 +71,8 @@ function create() {
         // update all other players of the new player
         socket.broadcast.emit('newPlayer', players[socket.id]);
 
-        // send the star object to the new player
-        socket.emit('starLocation', { x: self.star.x, y: self.star.y });
+        // send the flag object to the new player
+        socket.emit('flagLocation', { x: self.flag.x, y: self.flag.y });
         // send the current scores
         socket.emit('updateScore', self.scores);
 
@@ -129,7 +130,7 @@ function handlePlayerInput(self, playerId, input) {
 }
 
 function addPlayer(self, playerInfo) {
-    const player = self.physics.add.image(playerInfo.x, playerInfo.y, 'ship').setOrigin(0.5, 0.5).setDisplaySize(53, 40);
+    const player = self.physics.add.image(playerInfo.x, playerInfo.y, 'player').setOrigin(0.5, 0.5);
     player.setDrag(100);
     player.setAngularDrag(100);
     player.setMaxVelocity(200);

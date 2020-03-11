@@ -13,24 +13,34 @@ var config = {
 var game = new Phaser.Game(config);
 
 function preload() {
-    this.load.image('ship', 'assets/spaceShips_001.png');
-    this.load.image('otherPlayer', 'assets/enemyBlack5.png');
-    this.load.image('star', 'assets/star_gold.png');
+    this.load.image('player', 'assets/player.png');
+    this.load.image('flag', 'assets/flag.png');
+    this.load.image('background', 'assets/background.png');
+    this.load.image('redBase', 'assets/redBase.png');
+    this.load.image('blueBase', 'assets/blueBase.png');
 }
 
 function create() {
     var self = this;
     this.socket = io();
     this.players = this.add.group();
+    var background = this.add.image(800, 600, 'background');
+    background.setOrigin(1, 1).setDisplaySize(800, 600);
 
-    this.blueScoreText = this.add.text(16, 16, '', { fontSize: '32px', fill: '#0000FF' });
+    var redBase = this.add.image(90, 84, 'redBase');
+    redBase.setOrigin(1, 1).setDisplaySize(90, 84);
+
+    var blueBase = this.add.image(90, 84, 'blueBase');
+    blueBase.setOrigin(0.5, 0.5).setDisplaySize(90, 84);
+
+    this.blueScoreText = this.add.text(16, 16, '', { fontSize: '32px', fill: 'blue' });
     this.redScoreText = this.add.text(584, 16, '', { fontSize: '32px', fill: '#FF0000' });
 
 
     this.socket.on('currentPlayers', function (players) {
         Object.keys(players).forEach(function (id) {
             if (players[id].playerId === self.socket.id) {
-                displayPlayers(self, players[id], 'ship');
+                displayPlayers(self, players[id], 'player');
             } else {
                 displayPlayers(self, players[id], 'otherPlayer');
             }
@@ -64,11 +74,11 @@ function create() {
         self.redScoreText.setText('Red: ' + scores.red);
     });
 
-    this.socket.on('starLocation', function (starLocation) {
-        if (!self.star) {
-            self.star = self.add.image(starLocation.x, starLocation.y, 'star');
+    this.socket.on('flagLocation', function (flagLocation) {
+        if (!self.flag) {
+            self.flag = self.add.image(flagLocation.x, flagLocation.y, 'flag');
         } else {
-            self.star.setPosition(starLocation.x, starLocation.y);
+            self.flag.setPosition(flagLocation.x, flagLocation.y);
         }
     });
 
