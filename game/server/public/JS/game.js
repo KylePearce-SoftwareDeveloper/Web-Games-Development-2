@@ -24,6 +24,8 @@ function create() {
     var self = this;
     this.socket = io();
     this.players = this.add.group();
+
+
     var background = this.add.image(800, 600, 'background');
     background.setOrigin(1, 1).setDisplaySize(800, 600);
 
@@ -114,7 +116,7 @@ function update() {
 }
 
 function displayPlayers(self, playerInfo, sprite) {
-    const player = self.add.sprite(playerInfo.x, playerInfo.y, sprite).setOrigin(0.5, 0.5).setDisplaySize(53, 40);
+    const player = self.add.sprite(playerInfo.x, playerInfo.y, sprite).setOrigin(0.5, 0.5);
     if (playerInfo.team === 'blue') player.setTint(0x0000ff);
     else player.setTint(0xff0000);
     player.playerId = playerInfo.playerId;

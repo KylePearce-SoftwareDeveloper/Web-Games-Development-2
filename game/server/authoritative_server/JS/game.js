@@ -95,6 +95,7 @@ function create() {
 function update() {
     this.players.getChildren().forEach((player) => {
         const input = players[player.playerId].input;
+        player.setCollideWorldBounds(true);
         if (input.left) {
             player.setAngularVelocity(-300);
         } else if (input.right) {
@@ -113,7 +114,8 @@ function update() {
         players[player.playerId].y = player.y;
         players[player.playerId].rotation = player.rotation;
     });
-    this.physics.world.wrap(this.players, 5);
+   // this.physics.world.wrap(this.players, 5);
+
     io.emit('playerUpdates', players);
 }
 
