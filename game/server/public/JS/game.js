@@ -30,14 +30,13 @@ function create() {
     background.setOrigin(1, 1).setDisplaySize(800, 600);
 
     var redBase = this.add.image(90, 84, 'redBase');
-    redBase.setOrigin(1, 1).setDisplaySize(90, 84);
+    redBase.setOrigin(1,0.4).setDisplaySize(90, 84);
 
     var blueBase = this.add.image(90, 84, 'blueBase');
-    blueBase.setOrigin(0.5, 0.5).setDisplaySize(90, 84);
+    blueBase.setOrigin(-7,-5).setDisplaySize(90, 84);
 
     this.blueScoreText = this.add.text(16, 16, '', { fontSize: '32px', fill: 'blue' });
     this.redScoreText = this.add.text(584, 16, '', { fontSize: '32px', fill: '#FF0000' });
-
 
     this.socket.on('currentPlayers', function (players) {
         Object.keys(players).forEach(function (id) {
@@ -49,7 +48,8 @@ function create() {
         });
     });
 
-    this.socket.on('newPlayer', function (playerInfo) {
+    this.socket.on('newPlayer', function (playerInfo)
+    {
         displayPlayers(self, playerInfo, 'otherPlayer');
     });
 
@@ -117,8 +117,10 @@ function update() {
 
 function displayPlayers(self, playerInfo, sprite) {
     const player = self.add.sprite(playerInfo.x, playerInfo.y, sprite).setOrigin(0.5, 0.5);
-    if (playerInfo.team === 'blue') player.setTint(0x0000ff);
-    else player.setTint(0xff0000);
+    playerInfo.team = 'blue';
+    if (playerInfo.team == 'blue' )player.setTint(0x0000ff);
+    else {player.setTint(0xff0000);}
     player.playerId = playerInfo.playerId;
     self.players.add(player);
+
 }
