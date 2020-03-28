@@ -24,6 +24,8 @@ const config = {
 function preload() {
     this.load.image('player', 'assets/player.png');
     this.load.image('flag', 'assets/flag.png');
+    this.load.image('redBase', 'assets/redBase.png');
+    this.load.image('blueBase', 'assets/blueBase.png');
 }
 
 function create() {
@@ -39,15 +41,34 @@ function create() {
     this.physics.add.collider(this.players);
 
     this.physics.add.overlap(this.players, this.flag, function (flag, player) {
-        if (players[player.playerId].team === 'red') {
-            self.scores.red += 1;
-        } else {
-            self.scores.blue += 1;
-        }
         self.flag.setPosition(player.x, player.y);
+        io.emit('flagLocation', { x: self.flag.x, y: self.flag.y });
+    });
+
+    this.blueBase = this.physics.add.image(800, 600, 'blueBase');
+    this.physics.add.collider(this.blueBase);
+
+   this.physics.add.overlap(this.flag, this.blueBase, function (flag, blueBase) {
+        self.flag.setPosition(800/2, 600/2);
+        //if (players[player.playerId].team === 'blue') {
+            self.scores.blue += 1;
+        //}
         io.emit('updateScore', self.scores);
         io.emit('flagLocation', { x: self.flag.x, y: self.flag.y });
     });
+
+    this.redBase = this.physics.add.image(50, 50, 'redBase');
+    this.physics.add.collider(this.redBase);
+
+    this.physics.add.overlap(this.flag, this.redBase, function (flag, redBase) {
+        self.flag.setPosition(800/2, 600/2);
+        //if (players[player.playerId].team === 'blue') {
+        self.scores.red += 1;
+        //}
+        io.emit('updateScore', self.scores);
+        io.emit('flagLocation', { x: self.flag.x, y: self.flag.y });
+    });
+
 
     io.on('connection', function (socket) {
         console.log('a user connected');
