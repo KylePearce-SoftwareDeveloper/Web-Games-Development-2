@@ -151,7 +151,10 @@ function handlePlayerInput(self, playerId, input) {
 }
 
 function addPlayer(self, playerInfo) {
-    const player = self.physics.add.image(playerInfo.x, playerInfo.y, 'player').setOrigin(15,13);
+    const player = self.physics.add.image(playerInfo.x, playerInfo.y, 'player');
+    player.x = 650;
+    player.y = 550;
+    player._rotation = -35;
     player.setDrag(100);
     player.setAngularDrag(100);
     player.setMaxVelocity(200);
