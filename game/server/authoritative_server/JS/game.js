@@ -78,7 +78,7 @@ function create() {
             //x: Math.floor(Math.random() * 700) + 50,
            // y: Math.floor(Math.random() * 500) + 50,
             playerId: socket.id,
-           // team: (Math.floor(Math.random() * 2) == 0, 1.1) ? 'red' : 'blue',
+            team: (Math.floor(Math.random() * 2) == 0, 1.1) ? 'red' : 'blue',
             input: {
                 left: false,
                 right: false,

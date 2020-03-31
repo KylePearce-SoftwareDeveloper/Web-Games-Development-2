@@ -14,6 +14,7 @@ var game = new Phaser.Game(config);
 
 function preload() {
     this.load.image('player', 'assets/player.png');
+    this.load.image('notPlayer', 'assets/notPlayer.png');
     this.load.image('flag', 'assets/flag.png');
     this.load.image('background', 'assets/background.png');
     this.load.image('redBase', 'assets/redBase.png');
@@ -43,15 +44,24 @@ function create() {
             if (players[id].playerId === self.socket.id) {
                 displayPlayers(self, players[id], 'player');
             } else {
-                displayPlayers(self, players[id], 'otherPlayer');
+                displayPlayers(self, players[id], 'notPlayer');
             }
         });
     });
 
-    this.socket.on('newPlayer', function (playerInfo)
+
+    const maxCount = 4;
+    var count = 0;
+    if(count <= maxCount)
     {
-        displayPlayers(self, playerInfo, 'otherPlayer');
-    });
+        this.socket.on('newPlayer', function (playerInfo)
+        {
+            displayPlayers(self, playerInfo, 'notPlayer');
+            count++;
+            console.log('Count: ' + count);
+        });
+    }
+
 
     this.socket.on('disconnect', function (playerId) {
         self.players.getChildren().forEach(function (player) {
@@ -117,7 +127,8 @@ function update() {
 
 function displayPlayers(self, playerInfo, sprite) {
     const player = self.add.sprite(playerInfo.x, playerInfo.y, sprite).setOrigin(0.5, 0.5);
-    playerInfo.team = 'blue';
+    //playerInfo.team = 'blue';
+    //playerInfo.team: ? 'red' : 'blue',
     if (playerInfo.team == 'blue' )player.setTint(0x0000ff);
     else {player.setTint(0xff0000);}
     player.playerId = playerInfo.playerId;
