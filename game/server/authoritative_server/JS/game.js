@@ -9,7 +9,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: false,
+            debug: true,
             gravity: { y: 0 }
         }
     },
@@ -37,6 +37,20 @@ function create() {
         red: 0
     };
 
+    this.teams = {
+        currentCount: 0,
+        maxCount: 4,
+        maxBlue: 2,
+        maxRed: 2,
+        currentBlue: 0,
+        currentRed: 0,
+    };
+
+    this.timer = {
+        minute: 4,
+        seconds: 59
+    };
+
     this.flag = this.physics.add.image(800/2, 600/2, 'flag');
     this.physics.add.collider(this.players);
 
@@ -48,13 +62,14 @@ function create() {
     this.blueBase = this.physics.add.image(800, 600, 'blueBase');
     this.physics.add.collider(this.blueBase);
 
-   this.physics.add.overlap(this.flag, this.blueBase, function (flag, blueBase) {
-        self.flag.setPosition(800/2, 600/2);
+
+    this.physics.add.overlap(this.flag, this.blueBase, function (flag, blueBase) {
+        self.flag.setPosition(800 / 2, 600 / 2);
         //if (players[player.playerId].team === 'blue') {
-            self.scores.blue += 1;
+        self.scores.blue += 1;
         //}
         io.emit('updateScore', self.scores);
-        io.emit('flagLocation', { x: self.flag.x, y: self.flag.y });
+        io.emit('flagLocation', {x: self.flag.x, y: self.flag.y});
     });
 
     this.redBase = this.physics.add.image(50, 50, 'redBase');
@@ -69,22 +84,23 @@ function create() {
         io.emit('flagLocation', { x: self.flag.x, y: self.flag.y });
     });
 
-
     io.on('connection', function (socket) {
         console.log('a user connected');
         // create a new player and add it to our players object
         players[socket.id] = {
             rotation: 0,
-            //x: Math.floor(Math.random() * 700) + 50,
-           // y: Math.floor(Math.random() * 500) + 50,
+            x: Math.floor(Math.random() * 700) + 50,
+            y: Math.floor(Math.random() * 500) + 50,
             playerId: socket.id,
             team: (Math.floor(Math.random() * 2) == 0, 1.1) ? 'red' : 'blue',
             input: {
                 left: false,
                 right: false,
-                up: false
+                up: false,
+                down: false
             }
         };
+
         // add player to server
         addPlayer(self, players[socket.id]);
         // send the players object to the new player
@@ -96,6 +112,7 @@ function create() {
         socket.emit('flagLocation', { x: self.flag.x, y: self.flag.y });
         // send the current scores
         socket.emit('updateScore', self.scores);
+        socket.emit('updateTimer', self.timer);
 
         socket.on('disconnect', function () {
             console.log('user disconnected');
@@ -117,24 +134,28 @@ function update() {
     this.players.getChildren().forEach((player) => {
         const input = players[player.playerId].input;
         player.setCollideWorldBounds(true).setDrag(600, 600);
+
         if (input.left) {
-            player.setAngularVelocity(-300);
-        } else if (input.right) {
-            player.setAngularVelocity(300);
-        } else {
-            player.setAngularVelocity(0);
+            player.setVelocityX(-200);
+        }
+        if (input.right) {
+            player.setVelocityX(200);
+        }
+        if (input.up) {
+            player.setVelocityY(-200);
+        }
+        if (input.down) {
+            player.setVelocityY(200);
         }
 
-        if (input.up) {
-            this.physics.velocityFromRotation(player.rotation + 1.5, 200, player.body.acceleration);
-        } else {
-            player.setAcceleration(0);
-        }
+
 
         players[player.playerId].x = player.x;
         players[player.playerId].y = player.y;
         players[player.playerId].rotation = player.rotation;
     });
+    //self.timer.minute -= 1;
+    //io.emit('updateTimer', self.timer);
     io.emit('playerUpdates', players);
 }
 

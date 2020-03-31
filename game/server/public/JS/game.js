@@ -24,6 +24,8 @@ function preload() {
 function create() {
     var self = this;
     this.socket = io();
+    this.BlueTeam = this.add.group();
+    this.RedTeam = this.add.group();
     this.players = this.add.group();
 
 
@@ -38,6 +40,7 @@ function create() {
 
     this.blueScoreText = this.add.text(16, 16, '', { fontSize: '32px', fill: 'blue' });
     this.redScoreText = this.add.text(584, 16, '', { fontSize: '32px', fill: '#FF0000' });
+    this.timerText = this.add.text(200, 16, '', { fontSize: '32px', fill: 'blue' });
 
     this.socket.on('currentPlayers', function (players) {
         Object.keys(players).forEach(function (id) {
@@ -50,18 +53,17 @@ function create() {
     });
 
 
-    const maxCount = 4;
-    var count = 0;
-    if(count <= maxCount)
-    {
-        this.socket.on('newPlayer', function (playerInfo)
-        {
-            displayPlayers(self, playerInfo, 'notPlayer');
-            count++;
-            console.log('Count: ' + count);
-        });
-    }
-
+    //const maxCount = 4;
+   // var count = 0;
+    //if(count <= maxCount)
+   // {
+    //    this.socket.on('newPlayer', function (playerInfo)
+     //   {
+      //      displayPlayers(self, playerInfo, 'notPlayer');
+      //      count++;
+       //     console.log('Count: ' + count);
+      //  });
+   // }
 
     this.socket.on('disconnect', function (playerId) {
         self.players.getChildren().forEach(function (player) {
@@ -86,6 +88,11 @@ function create() {
         self.redScoreText.setText('Red: ' + scores.red);
     });
 
+    this.socket.on('updateTimer', function (timer) {
+        //self.timer.seconds -= 1;
+        self.timerText.setText('Time Remaining: ' + timer.minute + ':' + timer.seconds);
+    });
+
     this.socket.on('flagLocation', function (flagLocation) {
         if (!self.flag) {
             self.flag = self.add.image(flagLocation.x, flagLocation.y, 'flag');
@@ -98,12 +105,14 @@ function create() {
     this.leftKeyPressed = false;
     this.rightKeyPressed = false;
     this.upKeyPressed = false;
+    this.downKeyPressed = false;
 }
 
 function update() {
     const left = this.leftKeyPressed;
     const right = this.rightKeyPressed;
     const up = this.upKeyPressed;
+    const down = this.downKeyPressed;
 
     if (this.cursors.left.isDown) {
         this.leftKeyPressed = true;
@@ -116,22 +125,24 @@ function update() {
 
     if (this.cursors.up.isDown) {
         this.upKeyPressed = true;
+    } else if (this.cursors.down.isDown) {
+        this.downKeyPressed = true;
     } else {
         this.upKeyPressed = false;
+        this.downKeyPressed = false;
     }
 
-    if (left !== this.leftKeyPressed || right !== this.rightKeyPressed || up !== this.upKeyPressed) {
-        this.socket.emit('playerInput', { left: this.leftKeyPressed , right: this.rightKeyPressed, up: this.upKeyPressed });
+    if (left !== this.leftKeyPressed || right !== this.rightKeyPressed || up !== this.upKeyPressed || down != this.downKeyPressed) {
+        this.socket.emit('playerInput', { left: this.leftKeyPressed , right: this.rightKeyPressed, up: this.upKeyPressed, down: this.downKeyPressed });
     }
 }
 
 function displayPlayers(self, playerInfo, sprite) {
     const player = self.add.sprite(playerInfo.x, playerInfo.y, sprite).setOrigin(0.5, 0.5);
     //playerInfo.team = 'blue';
-    //playerInfo.team: ? 'red' : 'blue',
-    if (playerInfo.team == 'blue' )player.setTint(0x0000ff);
+    //playerInfo.team: ? 'red' : 'blue';
+    if (playerInfo.team === 'blue' )player.setTint(0x0000ff);
     else {player.setTint(0xff0000);}
     player.playerId = playerInfo.playerId;
     self.players.add(player);
-
 }
