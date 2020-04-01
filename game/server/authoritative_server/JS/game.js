@@ -133,11 +133,14 @@ function create() {
     });
 }
 
-function onEvent()
-{
-    io.emit('updateTimer', this.initialTime);
+function onEvent() {
+    if (this.initialTime >= 0 && this.initialTime<= 300) {
+        io.emit('updateTimer', this.initialTime--);
+    }
+    if (this.initialTime <=0){
+        this.initialTime.reset();
+    }
 }
-
 function update() {
     this.players.getChildren().forEach((player) => {
         const input = players[player.playerId].input;
