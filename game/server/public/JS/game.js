@@ -10,6 +10,9 @@ var config = {
     }
 };
 
+
+//timer
+var text;
 var game = new Phaser.Game(config);
 
 function preload() {
@@ -27,7 +30,6 @@ function create() {
     this.BlueTeam = this.add.group();
     this.RedTeam = this.add.group();
     this.players = this.add.group();
-
 
     var background = this.add.image(800, 600, 'background');
     background.setOrigin(1, 1).setDisplaySize(800, 600);
@@ -88,9 +90,9 @@ function create() {
         self.redScoreText.setText('Red: ' + scores.red);
     });
 
-    this.socket.on('updateTimer', function (timer) {
-        //self.timer.seconds -= 1;
-        self.timerText.setText('Time Remaining: ' + timer.minute + ':' + timer.seconds);
+    this.socket.on('updateTimer', function (time) {
+        time -= 1; // One second
+        self.timerText.setText('Countdown: ' + formatTime(time));
     });
 
     this.socket.on('flagLocation', function (flagLocation) {
@@ -106,6 +108,17 @@ function create() {
     this.rightKeyPressed = false;
     this.upKeyPressed = false;
     this.downKeyPressed = false;
+}
+
+function formatTime(seconds){
+    // Minutes
+    var minutes = Math.floor(seconds/60);
+    // Seconds
+    var partInSeconds = seconds%60;
+    // Adds left zeros to seconds
+    partInSeconds = partInSeconds.toString().padStart(2,'0');
+    // Returns formatted time
+    return `${minutes}:${partInSeconds}`;
 }
 
 function update() {
@@ -135,6 +148,8 @@ function update() {
     if (left !== this.leftKeyPressed || right !== this.rightKeyPressed || up !== this.upKeyPressed || down != this.downKeyPressed) {
         this.socket.emit('playerInput', { left: this.leftKeyPressed , right: this.rightKeyPressed, up: this.upKeyPressed, down: this.downKeyPressed });
     }
+
+    //text.setText('Event.progress: ' + timedEvent.getProgress().toString().substr(0, 4));
 }
 
 function displayPlayers(self, playerInfo, sprite) {

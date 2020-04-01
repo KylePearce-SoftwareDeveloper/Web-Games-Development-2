@@ -9,7 +9,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true,
+            debug: false,
             gravity: { y: 0 }
         }
     },
@@ -21,6 +21,8 @@ const config = {
     autoFocus: false
 };
 
+var timedEvent;
+
 function preload() {
     this.load.image('player', 'assets/player.png');
     this.load.image('flag', 'assets/flag.png');
@@ -29,6 +31,12 @@ function preload() {
 }
 
 function create() {
+    //timer
+    // Each 1000 ms call onEvent
+    this.initialTime = 300;
+    timedEvent = this.time.addEvent({ delay: 10, callback: onEvent, callbackScope: this, loop: true });
+    //timedEvent = this.time.delayedCall(3000, onEvent, [], this);
+
     const self = this;
     this.players = this.physics.add.group();
 
@@ -44,11 +52,6 @@ function create() {
         maxRed: 2,
         currentBlue: 0,
         currentRed: 0,
-    };
-
-    this.timer = {
-        minute: 4,
-        seconds: 59
     };
 
     this.flag = this.physics.add.image(800/2, 600/2, 'flag');
@@ -112,7 +115,7 @@ function create() {
         socket.emit('flagLocation', { x: self.flag.x, y: self.flag.y });
         // send the current scores
         socket.emit('updateScore', self.scores);
-        socket.emit('updateTimer', self.timer);
+        socket.emit('updateTimer', this.initialTime);
 
         socket.on('disconnect', function () {
             console.log('user disconnected');
@@ -130,6 +133,11 @@ function create() {
     });
 }
 
+function onEvent()
+{
+    io.emit('updateTimer', this.initialTime);
+}
+
 function update() {
     this.players.getChildren().forEach((player) => {
         const input = players[player.playerId].input;
@@ -145,18 +153,16 @@ function update() {
             player.setVelocityY(-200);
         }
         if (input.down) {
+            io.emit('updateTimer', this.initialTime);
             player.setVelocityY(200);
         }
-
-
 
         players[player.playerId].x = player.x;
         players[player.playerId].y = player.y;
         players[player.playerId].rotation = player.rotation;
     });
-    //self.timer.minute -= 1;
-    //io.emit('updateTimer', self.timer);
     io.emit('playerUpdates', players);
+
 }
 
 function randomPosition(max) {
