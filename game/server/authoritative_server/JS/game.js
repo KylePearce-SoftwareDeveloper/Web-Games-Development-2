@@ -34,7 +34,7 @@ function create() {
     //timer
     // Each 1000 ms call onEvent
     this.initialTime = 300;
-    timedEvent = this.time.addEvent({ delay: 10, callback: onEvent, callbackScope: this, loop: true });
+    timedEvent = this.time.addEvent({ delay: 1000, callback: onEvent, callbackScope: this, loop: true });
     //timedEvent = this.time.delayedCall(3000, onEvent, [], this);
 
     const self = this;
@@ -137,9 +137,10 @@ function onEvent() {
     if (this.initialTime >= 0 && this.initialTime<= 300) {
         io.emit('updateTimer', this.initialTime--);
     }
-    if (this.initialTime <=0){
-        this.initialTime.reset();
+    if(this.initialTime === 0){
+        this.initialTime += 1;
     }
+
 }
 function update() {
     this.players.getChildren().forEach((player) => {
