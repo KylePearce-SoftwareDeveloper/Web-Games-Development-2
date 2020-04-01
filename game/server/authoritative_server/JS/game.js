@@ -33,6 +33,8 @@ function preload() {
 function create() {
     //timer
     this.counter = 300;
+    this.playerCounter = 0;
+    const maxPlayers = 4;
     timedEvent = this.time.addEvent({ delay: 1000, callback: onEvent, callbackScope: this, loop: true });
 
     const self = this;
@@ -87,13 +89,14 @@ function create() {
 
     io.on('connection', function (socket) {
         console.log('a user connected');
+
         // create a new player and add it to our players object
         players[socket.id] = {
             rotation: 0,
             x: Math.floor(Math.random() * 700) + 50,
             y: Math.floor(Math.random() * 500) + 50,
             playerId: socket.id,
-            team: (Math.floor(Math.random() * 2) == 0, 1.1) ? 'red' : 'blue',
+            team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue',
             input: {
                 left: false,
                 right: false,
@@ -131,15 +134,23 @@ function create() {
     });
 }
 
+function playerCount(numPlayers)
+{
+    //counting players
+    if (this.playerCounter <= 4) {
+        io.emit('playerCount', numPlayers++);
+    }
+}
+
 function onEvent() {
-    if (this.counter >= 0 && this.counter<= 300) {
+    if (this.counter >= 0 && this.counter <= 300) {
         io.emit('updateTimer', this.counter--);
     }
-    if(this.counter === 0){
+    if (this.counter === 0){
         this.counter += 1;
     }
-
 }
+
 function update() {
     this.players.getChildren().forEach((player) => {
         const input = players[player.playerId].input;
@@ -156,6 +167,7 @@ function update() {
         }
         if (input.down) {
             player.setVelocityY(200);
+            playerCount(this.playerCounter);
         }
 
         players[player.playerId].x = player.x;
@@ -178,6 +190,7 @@ function handlePlayerInput(self, playerId, input) {
 }
 
 function addPlayer(self, playerInfo) {
+    playerCount(this.playerCounter);
     const player = self.physics.add.image(playerInfo.x, playerInfo.y, 'player');
     player.x = 650;
     player.y = 550;

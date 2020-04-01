@@ -40,6 +40,7 @@ function create() {
     this.blueScoreText = this.add.text(16, 16, '', { fontSize: '32px', fill: 'blue' });
     this.redScoreText = this.add.text(584, 16, '', { fontSize: '32px', fill: '#FF0000' });
     this.timerText = this.add.text(200, 16, '', { fontSize: '32px', fill: 'blue' });
+    this.countText = this.add.text(200, 50, '', { fontSize: '32px', fill: 'black' });
 
     this.socket.on('currentPlayers', function (players) {
         Object.keys(players).forEach(function (id) {
@@ -51,10 +52,10 @@ function create() {
         });
     });
 
-        this.socket.on('newPlayer', function (playerInfo)
-        {
-            displayPlayers(self, playerInfo, 'notPlayer');
-        });
+    this.socket.on('newPlayer', function (playerInfo)
+    {
+        displayPlayers(self, playerInfo, 'notPlayer');
+    });
 
     this.socket.on('disconnect', function (playerId) {
         self.players.getChildren().forEach(function (player) {
@@ -63,6 +64,7 @@ function create() {
             }
         });
     });
+
     this.socket.on('playerUpdates', function (players) {
         Object.keys(players).forEach(function (id) {
             self.players.getChildren().forEach(function (player) {
@@ -79,8 +81,13 @@ function create() {
         self.redScoreText.setText('Red: ' + scores.red);
     });
 
+    this.socket.on('playerCount', function (count)
+    {
+        count += 1;
+        self.countText.setText(`Count: ${count}`);
+    });
+
     this.socket.on('updateTimer', function (time) {
-        time -= 1; // One second
         self.timerText.setText('Countdown: ' + formatTime(time));
     });
 
@@ -137,8 +144,6 @@ function update() {
     if (left !== this.leftKeyPressed || right !== this.rightKeyPressed || up !== this.upKeyPressed || down != this.downKeyPressed) {
         this.socket.emit('playerInput', { left: this.leftKeyPressed , right: this.rightKeyPressed, up: this.upKeyPressed, down: this.downKeyPressed });
     }
-
-    //text.setText('Event.progress: ' + timedEvent.getProgress().toString().substr(0, 4));
 }
 
 function displayPlayers(self, playerInfo, sprite) {
