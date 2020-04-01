@@ -84,11 +84,16 @@ function create() {
     this.socket.on('playerCount', function (count)
     {
         count += 1;
-        self.countText.setText(`Count: ${count}`);
+        self.countText.setText('Count: ' + count);
     });
 
     this.socket.on('updateTimer', function (time) {
         self.timerText.setText('Countdown: ' + formatTime(time));
+    });
+
+    this.socket.on('moveBarriers', function (flagLocation) {
+        //fix the below and uncomment
+        //self.barriers..setPosition(100, 100);
     });
 
     this.socket.on('flagLocation', function (flagLocation) {

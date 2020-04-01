@@ -21,7 +21,8 @@ const config = {
     autoFocus: false
 };
 
-var timedEvent;
+var timerEvent;
+var moveBarriersEvent;
 
 function preload() {
     this.load.image('player', 'assets/player.png');
@@ -34,8 +35,9 @@ function create() {
     //timer
     this.counter = 300;
     this.playerCounter = 0;
-    const maxPlayers = 4;
-    timedEvent = this.time.addEvent({ delay: 1000, callback: onEvent, callbackScope: this, loop: true });
+    timerEvent = this.time.addEvent({ delay: 1000, callback: onEvent, callbackScope: this, loop: true });
+    //60000
+    moveBarriersEvent = this.time.addEvent({ delay: 1000, callback: moveBarriers, callbackScope: this, loop: true });
 
     const self = this;
     this.players = this.physics.add.group();
@@ -66,13 +68,14 @@ function create() {
     this.physics.add.collider(this.blueBase);
 
 
-    this.physics.add.overlap(this.flag, this.blueBase, function (flag, blueBase) {
+    this.physics.add.overlap(this.flag, this.blueBase, function (flag, blueBase, player) {
         self.flag.setPosition(800 / 2, 600 / 2);
-        //if (players[player.playerId].team === 'blue') {
+       // if (self.players[player.playerId].team === 'blue') {
         self.scores.blue += 1;
         //}
         io.emit('updateScore', self.scores);
         io.emit('flagLocation', {x: self.flag.x, y: self.flag.y});
+        io.emit('playerCount', this.playerCounter++);
     });
 
     this.redBase = this.physics.add.image(50, 50, 'redBase');
@@ -85,6 +88,7 @@ function create() {
         //}
         io.emit('updateScore', self.scores);
         io.emit('flagLocation', { x: self.flag.x, y: self.flag.y });
+        io.emit('playerCount', this.playerCounter++);
     });
 
     io.on('connection', function (socket) {
@@ -134,12 +138,19 @@ function create() {
     });
 }
 
-function playerCount(numPlayers)
-{
+function playerCount(numPlayers) {
     //counting players
-    if (this.playerCounter <= 4) {
+    //if (this.playerCounter <= 4) {
         io.emit('playerCount', numPlayers++);
-    }
+   // }
+}
+
+function moveBarriers()
+{
+    //randomly select an X and Y position on screen
+    //set the barriers position to this position
+    //uncomment the below and pass the positions in instead of flag positions
+    //io.emit('moveBarriers', { x: this.flag.x, y: this.flag.y });
 }
 
 function onEvent() {
@@ -190,7 +201,6 @@ function handlePlayerInput(self, playerId, input) {
 }
 
 function addPlayer(self, playerInfo) {
-    playerCount(this.playerCounter);
     const player = self.physics.add.image(playerInfo.x, playerInfo.y, 'player');
     player.x = 650;
     player.y = 550;
