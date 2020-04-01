@@ -10,9 +10,6 @@ var config = {
     }
 };
 
-
-//timer
-var text;
 var game = new Phaser.Game(config);
 
 function preload() {
@@ -54,18 +51,10 @@ function create() {
         });
     });
 
-
-    //const maxCount = 4;
-   // var count = 0;
-    //if(count <= maxCount)
-   // {
-    //    this.socket.on('newPlayer', function (playerInfo)
-     //   {
-      //      displayPlayers(self, playerInfo, 'notPlayer');
-      //      count++;
-       //     console.log('Count: ' + count);
-      //  });
-   // }
+        this.socket.on('newPlayer', function (playerInfo)
+        {
+            displayPlayers(self, playerInfo, 'notPlayer');
+        });
 
     this.socket.on('disconnect', function (playerId) {
         self.players.getChildren().forEach(function (player) {

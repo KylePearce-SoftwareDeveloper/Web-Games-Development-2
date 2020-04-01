@@ -32,10 +32,8 @@ function preload() {
 
 function create() {
     //timer
-    // Each 1000 ms call onEvent
-    this.initialTime = 300;
+    this.counter = 300;
     timedEvent = this.time.addEvent({ delay: 1000, callback: onEvent, callbackScope: this, loop: true });
-    //timedEvent = this.time.delayedCall(3000, onEvent, [], this);
 
     const self = this;
     this.players = this.physics.add.group();
@@ -115,7 +113,7 @@ function create() {
         socket.emit('flagLocation', { x: self.flag.x, y: self.flag.y });
         // send the current scores
         socket.emit('updateScore', self.scores);
-        socket.emit('updateTimer', this.initialTime);
+        socket.emit('updateTimer', this.counter);
 
         socket.on('disconnect', function () {
             console.log('user disconnected');
@@ -134,11 +132,11 @@ function create() {
 }
 
 function onEvent() {
-    if (this.initialTime >= 0 && this.initialTime<= 300) {
-        io.emit('updateTimer', this.initialTime--);
+    if (this.counter >= 0 && this.counter<= 300) {
+        io.emit('updateTimer', this.counter--);
     }
-    if(this.initialTime === 0){
-        this.initialTime += 1;
+    if(this.counter === 0){
+        this.counter += 1;
     }
 
 }
@@ -157,7 +155,6 @@ function update() {
             player.setVelocityY(-200);
         }
         if (input.down) {
-            io.emit('updateTimer', this.initialTime);
             player.setVelocityY(200);
         }
 
@@ -166,7 +163,6 @@ function update() {
         players[player.playerId].rotation = player.rotation;
     });
     io.emit('playerUpdates', players);
-
 }
 
 function randomPosition(max) {
